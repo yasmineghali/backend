@@ -160,7 +160,7 @@ class ContactAdminTest extends TestCase
 
         $labels = fn (string $group) => $groups[$group]->getItems()->map->getLabel()->values()->all();
         $this->assertSame(['Contacts', 'News'], collect($labels('GeoRevo'))->sort()->values()->all());
-        $this->assertSame(['Contacts'], $labels('BIMRevo'));
+        $this->assertSame(['Contacts', 'News'], collect($labels('BIMRevo'))->sort()->values()->all());
 
         $this->assertSame(url('/admin/contacts'), GeorevoContactResource::getUrl('index'));
         $this->assertSame(url('/admin/news-posts'), NewsPostResource::getUrl('index'));
