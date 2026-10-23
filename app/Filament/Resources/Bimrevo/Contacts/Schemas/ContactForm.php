@@ -22,7 +22,6 @@ class ContactForm
                         TextInput::make('email')->label('Email address')->disabled(),
                         TextInput::make('phone')->disabled(),
                         TextInput::make('company')->disabled(),
-                        TextInput::make('plan')->disabled(),
                         Textarea::make('message')->disabled()->rows(6)->columnSpanFull(),
                     ]),
                 Section::make('Follow-up')

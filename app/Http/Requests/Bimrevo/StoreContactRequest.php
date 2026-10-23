@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Bimrevo;
 
-use App\Models\Bimrevo\Contact;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreContactRequest extends FormRequest
 {
@@ -24,7 +22,6 @@ class StoreContactRequest extends FormRequest
             'email' => ['required', 'email:rfc', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'company' => ['nullable', 'string', 'max:255'],
-            'plan' => ['nullable', 'string', Rule::in(Contact::PLANS)],
             'message' => ['required', 'string', 'max:5000'],
             'source_url' => ['nullable', 'string', 'max:500'],
             'botcheck' => ['nullable'],

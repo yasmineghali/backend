@@ -36,9 +36,6 @@ class ContactsTable
                     ->label('Phone')
                     ->searchable()
                     ->copyable(),
-                TextColumn::make('plan')
-                    ->badge()
-                    ->placeholder('-'),
                 TextColumn::make('message')
                     ->limit(80)
                     ->wrap()
@@ -70,7 +67,6 @@ class ContactsTable
             ])
             ->filters([
                 SelectFilter::make('status')->options(Contact::STATUSES),
-                SelectFilter::make('plan')->options(array_combine(Contact::PLANS, Contact::PLANS)),
             ])
             ->recordActions([
                 ViewAction::make(),

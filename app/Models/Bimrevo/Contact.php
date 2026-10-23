@@ -8,8 +8,6 @@ class Contact extends Model
 {
     protected $table = 'bimrevo_contacts';
 
-    public const PLANS = ['Solo', 'Team', 'Enterprise'];
-
     public const STATUS_NEW = 'new';
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_HANDLED = 'handled';
@@ -25,7 +23,6 @@ class Contact extends Model
         'email',
         'phone',
         'company',
-        'plan',
         'message',
         'source_url',
         'status',

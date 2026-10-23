@@ -85,12 +85,11 @@ class ContactAdminTest extends TestCase
     public function test_view_page_shows_message_and_does_not_change_status(): void
     {
         $this->signIn();
-        $contact = $this->contact(['plan' => 'Team']);
+        $contact = $this->contact();
 
         $this->get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertOk()
-            ->assertSee('Hello')
-            ->assertSee('Team');
+            ->assertSee('Hello');
 
         $this->assertSame(Contact::STATUS_NEW, $contact->fresh()->status);
     }

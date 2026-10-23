@@ -20,7 +20,6 @@ class ContactInfolist
                         TextEntry::make('email')->label('Email address')->copyable(),
                         TextEntry::make('phone')->placeholder('-'),
                         TextEntry::make('company')->placeholder('-'),
-                        TextEntry::make('plan')->placeholder('-'),
                         TextEntry::make('created_at')->label('Received')->dateTime('d.m.Y H:i'),
                     ]),
                 Section::make('Message')

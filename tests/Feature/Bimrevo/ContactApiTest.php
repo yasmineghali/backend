@@ -28,7 +28,6 @@ class ContactApiTest extends TestCase
             'email' => 'jean@bureau.ch',
             'company' => 'Bureau XYZ',
             'phone' => '+41 79 000 00 00',
-            'plan' => 'Team',
             'message' => 'Bonjour',
         ], $overrides);
     }
@@ -41,7 +40,6 @@ class ContactApiTest extends TestCase
 
         $this->assertDatabaseHas('bimrevo_contacts', [
             'email' => 'jean@bureau.ch',
-            'plan' => 'Team',
             'status' => 'new',
             'handled_at' => null,
         ]);
@@ -60,9 +58,11 @@ class ContactApiTest extends TestCase
         $this->assertSame(0, BimrevoContact::count());
     }
 
-    public function test_plan_is_optional(): void
+    public function test_unknown_fields_such_as_plan_are_ignored(): void
     {
-        $this->postJson(self::URL, $this->payload(['plan' => null]))->assertCreated();
+        $this->postJson(self::URL, $this->payload(['plan' => 'Team']))->assertCreated();
+
+        $this->assertFalse(\Illuminate\Support\Facades\Schema::hasColumn('bimrevo_contacts', 'plan'));
         $this->assertSame(1, BimrevoContact::count());
     }
 
@@ -75,10 +75,6 @@ class ContactApiTest extends TestCase
         $this->postJson(self::URL, $this->payload(['email' => 'not-an-email']))
             ->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
-
-        $this->postJson(self::URL, $this->payload(['plan' => 'Gold']))
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['plan']);
 
         $this->postJson(self::URL, $this->payload(['message' => str_repeat('a', 5001)]))
             ->assertStatus(422)
