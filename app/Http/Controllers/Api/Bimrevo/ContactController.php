@@ -18,6 +18,7 @@ class ContactController extends Controller
 
         Contact::create([
             ...$request->safe()->except('botcheck'),
+            'status' => Contact::STATUS_NEW,
             'ip_address' => $request->ip(),
             'user_agent' => mb_substr((string) $request->userAgent(), 0, 500),
         ]);

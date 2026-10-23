@@ -25,7 +25,7 @@ class StoreContactRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'company' => ['nullable', 'string', 'max:255'],
             'plan' => ['nullable', 'string', Rule::in(Contact::PLANS)],
-            'message' => ['nullable', 'string', 'max:5000'],
+            'message' => ['required', 'string', 'max:5000'],
             'source_url' => ['nullable', 'string', 'max:500'],
             'botcheck' => ['nullable'],
         ];

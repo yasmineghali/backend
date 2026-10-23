@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Bimrevo\Contacts;
 
+use App\Filament\Resources\Bimrevo\Contacts\Pages\EditContact;
 use App\Filament\Resources\Bimrevo\Contacts\Pages\ListContacts;
 use App\Filament\Resources\Bimrevo\Contacts\Pages\ViewContact;
+use App\Filament\Resources\Bimrevo\Contacts\Schemas\ContactForm;
 use App\Filament\Resources\Bimrevo\Contacts\Schemas\ContactInfolist;
 use App\Filament\Resources\Bimrevo\Contacts\Tables\ContactsTable;
 use App\Models\Bimrevo\Contact;
@@ -38,7 +40,7 @@ class ContactResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Contact::unread()->count();
+        $count = Contact::where('status', Contact::STATUS_NEW)->count();
 
         return $count > 0 ? (string) $count : null;
     }
@@ -46,6 +48,11 @@ class ContactResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return ContactForm::configure($schema);
     }
 
     public static function infolist(Schema $schema): Schema
@@ -58,11 +65,17 @@ class ContactResource extends Resource
         return ContactsTable::configure($table);
     }
 
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListContacts::route('/'),
             'view' => ViewContact::route('/{record}'),
+            'edit' => EditContact::route('/{record}/edit'),
         ];
     }
 }

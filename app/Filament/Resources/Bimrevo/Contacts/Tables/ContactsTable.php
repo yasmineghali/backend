@@ -6,12 +6,12 @@ use App\Models\Bimrevo\Contact;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ContactsTable
@@ -21,24 +21,19 @@ class ContactsTable
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                IconColumn::make('is_read')
-                    ->label('')
-                    ->state(fn (Contact $record) => $record->isRead())
-                    ->boolean()
-                    ->trueIcon('heroicon-o-envelope-open')
-                    ->falseIcon('heroicon-s-envelope')
-                    ->trueColor('gray')
-                    ->falseColor('primary')
-                    ->tooltip(fn (Contact $record) => $record->isRead() ? 'Read' : 'Unread'),
                 TextColumn::make('created_at')
                     ->label('Received')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
                 TextColumn::make('name')
                     ->searchable()
-                    ->weight(fn (Contact $record) => $record->isRead() ? 'normal' : 'bold'),
+                    ->weight('bold'),
                 TextColumn::make('email')
                     ->label('Email address')
+                    ->searchable()
+                    ->copyable(),
+                TextColumn::make('phone')
+                    ->label('Phone')
                     ->searchable()
                     ->copyable(),
                 TextColumn::make('plan')
@@ -49,44 +44,58 @@ class ContactsTable
                     ->wrap()
                     ->tooltip(fn (Contact $record) => $record->message)
                     ->searchable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => Contact::STATUSES[$state] ?? $state)
+                    ->color(fn (string $state) => match ($state) {
+                        Contact::STATUS_NEW => 'warning',
+                        Contact::STATUS_IN_PROGRESS => 'info',
+                        Contact::STATUS_HANDLED => 'success',
+                        default => 'gray',
+                    }),
                 TextColumn::make('company')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('phone')
+                TextColumn::make('source_url')
+                    ->label('Page')
+                    ->limit(40)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('ip_address')
+                    ->label('IP')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('handled_at')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TernaryFilter::make('read')
-                    ->label('Status')
-                    ->placeholder('All')
-                    ->trueLabel('Read')
-                    ->falseLabel('Unread')
-                    ->queries(
-                        true: fn (Builder $query) => $query->whereNotNull('read_at'),
-                        false: fn (Builder $query) => $query->whereNull('read_at'),
-                        blank: fn (Builder $query) => $query,
-                    ),
+                SelectFilter::make('status')->options(Contact::STATUSES),
+                SelectFilter::make('plan')->options(array_combine(Contact::PLANS, Contact::PLANS)),
             ])
             ->recordActions([
-                ViewAction::make()->label('Open'),
-                Action::make('toggleRead')
-                    ->label(fn (Contact $record) => $record->isRead() ? 'Mark as unread' : 'Mark as read')
-                    ->icon(fn (Contact $record) => $record->isRead() ? 'heroicon-o-envelope' : 'heroicon-o-envelope-open')
-                    ->color('gray')
-                    ->action(fn (Contact $record) => $record->isRead() ? $record->markAsUnread() : $record->markAsRead()),
+                ViewAction::make(),
+                Action::make('markHandled')
+                    ->label('Mark handled')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (Contact $record) => $record->status !== Contact::STATUS_HANDLED)
+                    ->action(fn (Contact $record) => $record->update([
+                        'status' => Contact::STATUS_HANDLED,
+                        'handled_at' => now(),
+                    ])),
+                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkAction::make('markRead')
-                        ->label('Mark as read')
-                        ->icon('heroicon-o-envelope-open')
-                        ->action(fn (Collection $records) => $records->each->markAsRead())
+                    BulkAction::make('markHandled')
+                        ->label('Mark as handled')
+                        ->icon('heroicon-o-check-circle')
+                        ->action(fn (Collection $records) => $records->each->update([
+                            'status' => Contact::STATUS_HANDLED,
+                            'handled_at' => now(),
+                        ]))
                         ->deselectRecordsAfterCompletion(),
-                    BulkAction::make('markUnread')
-                        ->label('Mark as unread')
-                        ->icon('heroicon-o-envelope')
-                        ->action(fn (Collection $records) => $records->each->markAsUnread())
-                        ->deselectRecordsAfterCompletion(),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

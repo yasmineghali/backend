@@ -42,13 +42,27 @@ class ContactApiTest extends TestCase
         $this->assertDatabaseHas('bimrevo_contacts', [
             'email' => 'jean@bureau.ch',
             'plan' => 'Team',
-            'read_at' => null,
+            'status' => 'new',
+            'handled_at' => null,
         ]);
     }
 
-    public function test_pricing_form_without_message_is_accepted(): void
+    public function test_message_is_required(): void
     {
-        $this->postJson(self::URL, $this->payload(['message' => '']))->assertCreated();
+        $this->postJson(self::URL, $this->payload(['message' => '']))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['message']);
+
+        $this->postJson(self::URL, array_diff_key($this->payload(), ['message' => 1]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['message']);
+
+        $this->assertSame(0, BimrevoContact::count());
+    }
+
+    public function test_plan_is_optional(): void
+    {
+        $this->postJson(self::URL, $this->payload(['plan' => null]))->assertCreated();
         $this->assertSame(1, BimrevoContact::count());
     }
 

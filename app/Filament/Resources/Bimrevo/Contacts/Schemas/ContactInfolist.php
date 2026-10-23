@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bimrevo\Contacts\Schemas;
 
+use App\Models\Bimrevo\Contact;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -26,8 +27,16 @@ class ContactInfolist
                     ->schema([
                         TextEntry::make('message')
                             ->hiddenLabel()
-                            ->placeholder('No message')
                             ->columnSpanFull(),
+                    ]),
+                Section::make('Follow-up')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('status')
+                            ->badge()
+                            ->formatStateUsing(fn (string $state) => Contact::STATUSES[$state] ?? $state),
+                        TextEntry::make('handled_at')->dateTime('d.m.Y H:i')->placeholder('-'),
+                        TextEntry::make('admin_notes')->label('Internal notes')->placeholder('-')->columnSpanFull(),
                     ]),
                 Section::make('Technical details')
                     ->columns(2)

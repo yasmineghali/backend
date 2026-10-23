@@ -2,7 +2,6 @@
 
 namespace App\Models\Bimrevo;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Contact extends Model
@@ -10,6 +9,16 @@ class Contact extends Model
     protected $table = 'bimrevo_contacts';
 
     public const PLANS = ['Solo', 'Team', 'Enterprise'];
+
+    public const STATUS_NEW = 'new';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_HANDLED = 'handled';
+
+    public const STATUSES = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_IN_PROGRESS => 'In progress',
+        self::STATUS_HANDLED => 'Handled',
+    ];
 
     protected $fillable = [
         'name',
@@ -19,37 +28,17 @@ class Contact extends Model
         'plan',
         'message',
         'source_url',
+        'status',
+        'admin_notes',
         'ip_address',
         'user_agent',
-        'read_at',
+        'handled_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'read_at' => 'datetime',
+            'handled_at' => 'datetime',
         ];
-    }
-
-    public function scopeUnread(Builder $query): Builder
-    {
-        return $query->whereNull('read_at');
-    }
-
-    public function isRead(): bool
-    {
-        return $this->read_at !== null;
-    }
-
-    public function markAsRead(): void
-    {
-        if (! $this->isRead()) {
-            $this->update(['read_at' => now()]);
-        }
-    }
-
-    public function markAsUnread(): void
-    {
-        $this->update(['read_at' => null]);
     }
 }
